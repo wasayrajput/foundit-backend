@@ -10,10 +10,21 @@ const seedAdmins = require('./config/seedAdmin');
 
 // Load environment variables
 dotenv.config();
-// Connect Database & Seed Admins
-connectDB().then(() => {
-  seedAdmins();
-});
+// Connect Database & Seed Admins in non-serverless mode
+if (!process.env.VERCEL) {
+  connectDB().then(() => {
+    seedAdmins();
+  });
+} else {
+  app.use(async (req, res, next) => {
+    try {
+      if (process.env.MONGO_URI) {
+        await connectDB();
+      }
+    } catch (_) {}
+    next();
+  });
+}
 
 const app = express();
 const server = http.createServer(app);
