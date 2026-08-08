@@ -12,26 +12,13 @@ const seedAdmins = require('./config/seedAdmin');
 dotenv.config();
 
 const app = express();
-const server = http.createServer(app);
 
 // Connect Database & Seed Admins in non-serverless mode
 if (!process.env.VERCEL) {
+  const server = http.createServer(app);
   connectDB().then(() => {
     seedAdmins();
   });
-} else {
-  app.use(async (req, res, next) => {
-    try {
-      if (process.env.MONGO_URI) {
-        await connectDB();
-      }
-    } catch (_) {}
-    next();
-  });
-}
-
-// Initialize Socket.io WebSockets in non-serverless mode
-if (!process.env.VERCEL) {
   const io = new Server(server, {
     cors: {
       origin: '*',
@@ -45,6 +32,15 @@ if (!process.env.VERCEL) {
     });
   });
   app.set('io', io);
+} else {
+  app.use(async (req, res, next) => {
+    try {
+      if (process.env.MONGO_URI) {
+        await connectDB();
+      }
+    } catch (_) {}
+    next();
+  });
 }
 
 // Middleware
