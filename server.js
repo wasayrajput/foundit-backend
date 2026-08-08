@@ -10,6 +10,10 @@ const seedAdmins = require('./config/seedAdmin');
 
 // Load environment variables
 dotenv.config();
+
+const app = express();
+const server = http.createServer(app);
+
 // Connect Database & Seed Admins in non-serverless mode
 if (!process.env.VERCEL) {
   connectDB().then(() => {
@@ -25,9 +29,6 @@ if (!process.env.VERCEL) {
     next();
   });
 }
-
-const app = express();
-const server = http.createServer(app);
 
 // Initialize Socket.io WebSockets
 const io = new Server(server, {
