@@ -30,13 +30,22 @@ if (!process.env.VERCEL) {
   });
 }
 
-// Initialize Socket.io WebSockets
-const io = new Server(server, {
-  cors: {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  },
-});
+// Initialize Socket.io WebSockets in non-serverless mode
+if (!process.env.VERCEL) {
+  const io = new Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    },
+  });
+  io.on('connection', (socket) => {
+    console.log(`⚡ WebSocket Client Connected: ${socket.id}`);
+    socket.on('disconnect', () => {
+      console.log(`🔌 WebSocket Client Disconnected: ${socket.id}`);
+    });
+  });
+  app.set('io', io);
+}
 
 // Middleware
 app.use(cors());
@@ -70,18 +79,6 @@ app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
-
-// Socket.io Connection & Real-Time Event Handlers
-io.on('connection', (socket) => {
-  console.log(`⚡ WebSocket Client Connected: ${socket.id}`);
-
-  socket.on('disconnect', () => {
-    console.log(`🔌 WebSocket Client Disconnected: ${socket.id}`);
-  });
-});
-
-// Attach Socket.io instance to app for controllers if needed
-app.set('io', io);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
