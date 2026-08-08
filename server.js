@@ -73,7 +73,11 @@ app.set('io', io);
 
 // Start Server
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Foundit Backend Server running on http://0.0.0.0:${PORT}`);
-  console.log(`📡 Health Check URL: http://localhost:${PORT}/api/health`);
-});
+if (!process.env.VERCEL) {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Foundit Backend Server running on http://0.0.0.0:${PORT}`);
+    console.log(`📡 Health Check URL: http://localhost:${PORT}/api/health`);
+  });
+}
+
+module.exports = app;
